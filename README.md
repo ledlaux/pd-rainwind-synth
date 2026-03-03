@@ -16,7 +16,7 @@ The synthesizer runs entirely in the browser using a high-performance DSP engine
 
 ##  Sound Engine
 
-The core synthesizer is based on an original [patch](https://youtu.be/ZXwk8sDts0Y) by Simple Trax and Taavi Viikman, adapted for WebAssembly compilation.
+The core synthesis is based on an original [patch](https://youtu.be/ZXwk8sDts0Y) by Simple Trax and Taavi Viikman, adapted for hvcc.
 
 - Built in **Pure Data**
 - Compiled using **Plugdata Compile Mode**
