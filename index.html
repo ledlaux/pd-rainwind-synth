@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<!--
+ <!--
   Rain & Wind Synthesizer
   -----------------------
 
@@ -13,11 +12,10 @@
   Ledlaux
 
   MIT License
--->
-
+--> 
 <head>
     <meta charset="UTF-8">
-    <title>Rain & Wind</title>
+    <title>Rain & Wind Synthesizer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400&display=swap" rel="stylesheet">
     <script type="application/javascript" src="./rain.js"></script>
@@ -202,9 +200,12 @@
     let rainDensity, stormLevel, windTurb;
 
     function syncVisualState() {
-        rainDensity = controls.find(c => c.cc === 17).val;
-        stormLevel = controls.find(c => c.cc === 13).val;
-        windTurb = controls.find(c => c.cc === 14).val;
+        const d = controls.find(c => c.cc === 17);
+        const s = controls.find(c => c.cc === 13);
+        const w = controls.find(c => c.cc === 14);
+        rainDensity = d ? d.val : 38;
+        stormLevel = s ? s.val : 1;
+        windTurb = w ? w.val : 33;
     }
 
     window.onload = function() {
@@ -236,7 +237,9 @@
         btn.classList.add("active");
         
         setTimeout(() => {
-            controls.forEach(c => sendToSynth(c.cc, c.val));
+            controls.forEach(c => {
+                sendToSynth(c.cc, c.val);
+            });
         }, 150);
     }
 
@@ -257,6 +260,20 @@
         }
     }
 
+    function updateParam(cc, v) {
+        const ctrl = controls.find(c => c.cc === cc);
+        if (ctrl) ctrl.val = v;
+        
+        const display = document.getElementById(`val-${cc}`);
+        if (display) display.innerText = v;
+        
+        if (cc === 17) rainDensity = v;
+        if (cc === 13) stormLevel = v;
+        if (cc === 14) windTurb = v;
+        
+        sendToSynth(cc, v);
+    }
+
     function randomiseParameters() {
         controls.forEach(ctrl => {
             if (ctrl.cc === 7) return; 
@@ -268,19 +285,6 @@
                 updateParam(ctrl.cc, randVal);
             }
         });
-    }
-
-    function updateParam(cc, v) {
-        const ctrl = controls.find(c => c.cc === cc);
-        if (ctrl) ctrl.val = v;
-        
-        document.getElementById(`val-${cc}`).innerText = v;
-        
-        if (cc === 17) rainDensity = v;
-        if (cc === 13) stormLevel = v;
-        if (cc === 14) windTurb = v;
-        
-        sendToSynth(cc, v);
     }
 
     const canvas = document.getElementById('canvas');
