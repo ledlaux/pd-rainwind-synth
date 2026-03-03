@@ -8,7 +8,7 @@ Athmosferic rain and wind sound generator
 
 ## Technical Overview ##
 
-This project is a result of my exploration of Plugdata compile mode. It connects high-performance audio DSP and web technologies. By using Heavy (hvcc) - the PD patch is converted into highly optimized C++ and then compiled into WebAssembly.
+This project is a result of my exploration of Plugdata compile mode. It connects high-performance audio DSP with web technologies. By using Heavy (hvcc) - the PD patch is converted into highly optimized C++ and then compiled into WebAssembly.
 
 
 ## Key Features ##
