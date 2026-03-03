@@ -273,9 +273,7 @@
             <h2>Rain & Wind</h2>
             <div class="controls-row">
                 <button id="transportButton" class="btn" onclick="toggleTransport()" disabled>Loading...</button>
-                <select id="presetSelect" class="preset-select" onchange="loadPreset(this.value)">
-                    <option value="light">Light Rain</option>
-                    <option value="intensive">Intensive Rain</option>
+              <select id="presetSelect" class="preset-select" onchange="loadPreset(this.value)">
                 </select>
                 <button id="randomButton" class="btn" onclick="randomiseParameters()">Random</button>
             </div>
@@ -296,7 +294,12 @@
         { cc: 11, name: "Space", val: 60 },
         { cc: 10, name: "Surface", val: 41 }
     ];
-    const presets = { light: [71, 1, 33, 38, 120, 23, 127, 60, 41], intensive: [71, 1, 33, 66, 21, 87, 127, 60, 41] };
+
+    const presets = { 
+        light: [71, 1, 33, 38, 120, 23, 127, 60, 41], 
+        medium: [71, 1, 33, 66, 21, 87, 127, 60, 41], 
+        intensive: [71, 1, 54, 70, 16, 127, 127, 127, 127 ] };
+
     let rainDensity, stormLevel, windTurb;
 
     function toggleAbout(show) { document.getElementById('infoModal').style.display = show ? 'flex' : 'none'; }
@@ -306,16 +309,28 @@
         windTurb = controls.find(c => c.cc === 14).val;
     }
 
-    window.onload = function() {
-        syncVisualState();
-        if (typeof rain_Module === 'function') {
-            rain_Module().then(m => {
-                heavyModule = m; loader = new m.AudioLibLoader();
-                const b = document.getElementById("transportButton");
-                b.disabled = false; b.innerText = "Start";
-            });
-        }
+window.onload = function() {
+    const select = document.getElementById('presetSelect');
+    if (select) {
+        select.innerHTML = '';
+        Object.keys(presets).forEach(key => {
+            const opt = document.createElement('option');
+            opt.value = key;
+            opt.innerText = key.charAt(0).toUpperCase() + key.slice(1);
+            select.appendChild(opt);
+        });
     }
+    syncVisualState();
+    if (typeof rain_Module === 'function') {
+        rain_Module().then(m => {
+            heavyModule = m; 
+            loader = new m.AudioLibLoader();
+            const b = document.getElementById("transportButton");
+            b.disabled = false; 
+            b.innerText = "Start";
+        });
+    }
+}
 
     function toggleTransport() {
         const b = document.getElementById("transportButton");
@@ -338,18 +353,26 @@
     }
 
     function updateParam(cc, v) {
-        const c = controls.find(ctrl => ctrl.cc === cc);
-        if (!c) return;
-        c.val = v;
-        const s = document.querySelector(`input[data-cc="${cc}"]`);
-        if (s && s.value != v) s.value = v;
-        const d = document.getElementById(`val-${cc}`);
-        if (d) d.innerText = v;
-        if (cc === 17) rainDensity = v;
-        if (cc === 13) stormLevel = v;
-        if (cc === 14) windTurb = v;
+    const c = controls.find(ctrl => ctrl.cc === cc);
+    if (!c) return;
+
+    c.val = v;
+    
+    const s = document.querySelector(`input[data-cc="${cc}"]`);
+    if (s && s.value != v) s.value = v;
+    const d = document.getElementById(`val-${cc}`);
+    if (d) d.innerText = v;
+    if (cc === 17) rainDensity = v;
+    if (cc === 13) stormLevel = v;
+    if (cc === 14) windTurb = v;
+
+    if (cc === 7) {
+        const curvedVol = Math.floor(Math.pow(v / 127, 2) * 127);
+        sendToSynth(cc, curvedVol);
+    } else {
         sendToSynth(cc, v);
     }
+}
 
     function loadPreset(k) { presets[k].forEach((v, i) => updateParam(controls[i].cc, v)); }
     function randomiseParameters() { controls.forEach(c => { if(c.cc!=7) updateParam(c.cc, Math.floor(Math.random()*((c.range||127)+1))); }); }
