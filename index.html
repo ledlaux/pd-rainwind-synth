@@ -188,21 +188,21 @@
     var loader = null;
 
     const controls = [
-        { cc: 7,  name: "Master<br>Gain", val: 50 }, 
-        { cc: 11, name: "Rain<br>Density", val: 81 }, 
-        { cc: 12, name: "HF<br>Damp", val: 81 },
-        { cc: 13, name: "Storm<br>Level", val: 2, isSwitch: true }, 
-        { cc: 14, name: "Wind<br>Turb", val: 33 },
-        { cc: 15, name: "Impact<br>Vel", val: 81 }, 
-        { cc: 16, name: "Droplet<br>Mass", val: 91 },
-        { cc: 17, name: "Space<br>Size", val: 43 },
-         { cc: 10, name: "Surface<br>Grain", val: 77 }
+        { cc: 7,  name: "Volume", val: 102 }, 
+        { cc: 13, name: "Rain", val: 1, isSwitch: true }, 
+        { cc: 14, name: "Wind", val: 33 },
+        { cc: 17, name: "Density", val: 38 }, 
+        { cc: 12, name: "HF", val: 120 },
+        { cc: 15, name: "Impact", val: 23 }, 
+        { cc: 16, name: "Droplet", val: 127 },
+        { cc: 11, name: "Space", val: 60 },
+        { cc: 10, name: "Surface", val: 41 }
     ];
 
     let rainDensity, stormLevel, windTurb;
 
     function syncVisualState() {
-        rainDensity = controls.find(c => c.cc === 11).val;
+        rainDensity = controls.find(c => c.cc === 17).val;
         stormLevel = controls.find(c => c.cc === 13).val;
         windTurb = controls.find(c => c.cc === 14).val;
     }
@@ -276,7 +276,7 @@
         
         document.getElementById(`val-${cc}`).innerText = v;
         
-        if (cc === 11) rainDensity = v;
+        if (cc === 17) rainDensity = v;
         if (cc === 13) stormLevel = v;
         if (cc === 14) windTurb = v;
         
