@@ -61,10 +61,10 @@ Sliders in the HTML interface are mapped to specific **MIDI CC values** defined 
 
 I am working on the preset system. For now you can try this values:
 
-Light rain (default)
+**Light rain (default)**  
   102 33 38 120 23 127 60 41
   
-Intensive rain 
+**Intensive rain**   
 102 1 33 38 21 87 127 60 41
 
 
