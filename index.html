@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
- <!--
+<!--
   Rain & Wind Synthesizer
   -----------------------
 
@@ -48,6 +48,59 @@
             z-index: 1;
         }
 
+        #infoModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--bg);
+            border: 1px solid var(--line);
+            padding: 30px;
+            max-width: 420px;
+            text-align: left;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-content h3 {
+            font-weight: 100;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .modal-content p {
+            font-size: 10px;
+            line-height: 1.5;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+        }
+
+        .modal-content a { color: #fff; text-decoration: none; border-bottom: 1px solid var(--line); }
+
+        .copyright {
+            font-size: 9px;
+            color: rgba(255,255,255,0.3);
+            text-align: center;
+            margin-top: 15px;
+            letter-spacing: 1px;
+        }
+
+        .coffee-wrapper { margin: 15px 0; text-align: center; }
+
+        .close-btn { margin-top: 10px; width: 100%; }
+
         .ui-layer {
             position: relative;
             z-index: 10;
@@ -66,7 +119,20 @@
             align-items: center;
             width: 100%;
             margin-bottom: 30px;
+            position: relative;
         }
+
+        .info-trigger {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            cursor: pointer;
+            opacity: 0.4;
+            transition: opacity 0.2s;
+            padding: 10px;
+        }
+
+        .info-trigger:hover { opacity: 1; }
 
         h2 { 
             font-weight: 100; 
@@ -78,11 +144,7 @@
             text-align: center;
         }
 
-        .controls-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
+        .controls-row { display: flex; gap: 10px; align-items: center; }
 
         .btn, .preset-select {
             background: transparent;
@@ -101,9 +163,7 @@
             outline: none !important;
         }
 
-        #transportButton, #randomButton { 
-            width: 100px; 
-        }
+        #transportButton, #randomButton { width: 100px; }
 
         .preset-select {
             outline: none;
@@ -148,13 +208,7 @@
             align-items: center;
         }
 
-        .slider-wrapper {
-            height: 220px;
-            width: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        .slider-wrapper { height: 220px; width: 40px; display: flex; align-items: center; justify-content: center; }
 
         input[type=range] { 
             -webkit-appearance: none;
@@ -163,42 +217,17 @@
             height: 40px;
             background: transparent;
             outline: none !important;
-            box-shadow: none !important;
-            cursor: ns-resize;
             transform: rotate(-90deg);
             margin: 0;
             border-top: 1px solid var(--line);
             border-bottom: 1px solid var(--line);
-            -webkit-tap-highlight-color: transparent;
-            will-change: transform;
         }
 
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            appearance: none;
             width: 2px;
             height: 38px;
             background: rgba(255, 255, 255, 0.8);
-            border: none;
-            box-shadow: none !important;
-            border-radius: 0;
-            transition: none;
-            image-rendering: crisp-edges;
-        }
-
-        input[type=range]::-moz-range-thumb {
-            width: 2px;
-            height: 38px;
-            background: rgba(255, 255, 255, 0.8);
-            border: none;
-            box-shadow: none !important;
-            border-radius: 0;
-            transition: none;
-            image-rendering: crisp-edges;
-        }
-
-        input[type=range]:focus {
-            outline: none;
         }
 
         .val-display { font-family: monospace; font-size: 10px; color: #fff; margin-top: 15px; }
@@ -208,8 +237,34 @@
 
     <canvas id="canvas"></canvas>
 
+    <div id="infoModal" onclick="toggleAbout(false)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h3>About</h3>
+            <p>Interactive rain & wind generator using <strong>Pure Data</strong> and <strong>WebAssembly</strong> via Heavy (hvcc)</p>
+            <p>• Low-latency DSP engine.<br>• Reactive Canvas visuals<br>• Slider mapping to patch parameters</p>
+            <p>Source: <a href="https://github.com/ledlaux/pd-rainwind-synth" target="_blank">GitHub</a></p>
+            <div class="coffee-wrapper">
+                <a href="https://www.buymeacoffee.com/ledlaux" target="_blank">
+                    <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Coffee">
+                </a>
+            </div>
+
+            <div class="copyright">
+                © 2026 Vadims Maksimovs | MIT License
+            </div>
+
+            <button class="btn close-btn" onclick="toggleAbout(false)">Close</button>
+        </div>
+    </div>
+
     <div class="ui-layer">
         <div class="header-section">
+            <div class="info-trigger" onclick="toggleAbout(true)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.2">
+                    <path d="M12 12v8a2 2 0 0 0 4 0"></path>
+                    <path d="M12 2a10 10 0 0 0-10 10l10 0l10 0a10 10 0 0 0-10-10Z"></path>
+                </svg>
+            </div>
             <h2>Rain & Wind</h2>
             <div class="controls-row">
                 <button id="transportButton" class="btn" onclick="toggleTransport()" disabled>Loading...</button>
@@ -224,9 +279,7 @@
     </div>
 
 <script>
-    var heavyModule = null;
-    var loader = null;
-
+    var heavyModule = null, loader = null;
     const controls = [
         { cc: 7,  name: "Volume", val: 71 }, 
         { cc: 13, name: "Rain", val: 1, isSwitch: true }, 
@@ -238,181 +291,98 @@
         { cc: 11, name: "Space", val: 60 },
         { cc: 10, name: "Surface", val: 41 }
     ];
-
-    const presets = {
-        light: [71, 1, 33, 38, 120, 23, 127, 60, 41],
-        intensive: [71, 1, 33, 66, 21, 87, 127, 60, 41]
-    };
-
+    const presets = { light: [71, 1, 33, 38, 120, 23, 127, 60, 41], intensive: [71, 1, 33, 66, 21, 87, 127, 60, 41] };
     let rainDensity, stormLevel, windTurb;
 
+    function toggleAbout(show) { document.getElementById('infoModal').style.display = show ? 'flex' : 'none'; }
     function syncVisualState() {
-        const d = controls.find(c => c.cc === 17);
-        const s = controls.find(c => c.cc === 13);
-        const w = controls.find(c => c.cc === 14);
-        rainDensity = d ? d.val : 38;
-        stormLevel = s ? s.val : 1;
-        windTurb = w ? w.val : 33;
+        rainDensity = controls.find(c => c.cc === 17).val;
+        stormLevel = controls.find(c => c.cc === 13).val;
+        windTurb = controls.find(c => c.cc === 14).val;
     }
 
     window.onload = function() {
         syncVisualState();
         if (typeof rain_Module === 'function') {
-            rain_Module().then(loadedModule => {
-                heavyModule = loadedModule;
-                loader = new heavyModule.AudioLibLoader();
-                const btn = document.getElementById("transportButton");
-                btn.disabled = false;
-                btn.innerText = "Start";
+            rain_Module().then(m => {
+                heavyModule = m; loader = new m.AudioLibLoader();
+                const b = document.getElementById("transportButton");
+                b.disabled = false; b.innerText = "Start";
             });
         }
     }
 
-    function loadPreset(presetKey) {
-        const values = presets[presetKey];
-        if (!values) return;
-        controls.forEach((ctrl, index) => {
-            updateParam(ctrl.cc, values[index]);
-        });
-    }
-
     function toggleTransport() {
-        if (!loader) return;
-        const btn = document.getElementById("transportButton");
-        if(!loader.webAudioContext) {
-            loader.init({ blockSize: 2048 }).then(() => startAudio(btn));
-        } else {
-            (loader.isPlaying) ? stopAudio(btn) : startAudio(btn);
-        }
+        const b = document.getElementById("transportButton");
+        if(!loader.webAudioContext) loader.init({ blockSize: 2048 }).then(() => startAudio(b));
+        else loader.isPlaying ? stopAudio(b) : startAudio(b);
     }
 
-    function startAudio(btn) {
-        loader.start();
-        btn.innerText = "Stop";
-        btn.classList.add("active");
-        setTimeout(() => {
-            controls.forEach(c => sendToSynth(c.cc, c.val));
-        }, 150);
+    function startAudio(b) {
+        loader.start(); b.innerText = "Stop"; b.classList.add("active");
+        setTimeout(() => controls.forEach(c => sendToSynth(c.cc, c.val)), 150);
     }
 
-    function stopAudio(btn) {
-        loader.stop();
-        btn.innerText = "Start";
-        btn.classList.remove("active");
-    }
+    function stopAudio(b) { loader.stop(); b.innerText = "Start"; b.classList.remove("active"); }
 
     function sendToSynth(cc, value) {
         if (loader && loader.isPlaying) {
-            const midiMsg = [0xB0, cc, value];
-            if(loader.webAudioWorklet) {
-                loader.sendMidi(midiMsg);
-            } else if (loader.audiolib) {
-                loader.audiolib.sendMidi(midiMsg);
-            }
+            const msg = [0xB0, cc, value];
+            loader.webAudioWorklet ? loader.sendMidi(msg) : loader.audiolib.sendMidi(msg);
         }
     }
 
     function updateParam(cc, v) {
-        const ctrl = controls.find(c => c.cc === cc);
-        if (!ctrl) return;
-        
-        ctrl.val = v;
-        const slider = document.querySelector(`input[data-cc="${cc}"]`);
-        
-        if (slider && slider.value != v) {
-            slider.value = v;
-        }
-
-        const display = document.getElementById(`val-${cc}`);
-        if (display) display.innerText = v;
-        
+        const c = controls.find(ctrl => ctrl.cc === cc);
+        if (!c) return;
+        c.val = v;
+        const s = document.querySelector(`input[data-cc="${cc}"]`);
+        if (s && s.value != v) s.value = v;
+        const d = document.getElementById(`val-${cc}`);
+        if (d) d.innerText = v;
         if (cc === 17) rainDensity = v;
         if (cc === 13) stormLevel = v;
         if (cc === 14) windTurb = v;
-        
         sendToSynth(cc, v);
     }
 
-    function randomiseParameters() {
-        controls.forEach(ctrl => {
-            if (ctrl.cc === 7) return; 
-            const maxVal = ctrl.isSwitch ? 2 : 127;
-            const randVal = Math.floor(Math.random() * (maxVal + 1));
-            updateParam(ctrl.cc, randVal);
-        });
-    }
+    function loadPreset(k) { presets[k].forEach((v, i) => updateParam(controls[i].cc, v)); }
+    function randomiseParameters() { controls.forEach(c => { if(c.cc!=7) updateParam(c.cc, Math.floor(Math.random()*(c.isSwitch?3:128))); }); }
 
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
+    const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
     let width, height, streaks = [];
-
-    function resize() {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
-    }
+    function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
 
     class RainStreak {
         constructor() { this.init(); }
-        init() {
-            this.x = Math.random() * width;
-            this.y = Math.random() * height;
-            this.z = Math.random(); 
-            this.len = 5 + (this.z * 10); 
-            this.speed = 10 + (this.z * 12);
-        }
+        init() { this.x = Math.random()*width; this.y = Math.random()*height; this.z = Math.random(); this.len = 5+(this.z*10); this.speed = 10+(this.z*12); }
         update() {
-            const v = this.speed * (1 + (stormLevel * 0.8)); 
-            const drift = (windTurb - 64) / 8; 
-            this.y += v;
-            this.x += drift * (this.z + 0.2); 
-            if (this.y > height) { this.y = -20; this.x = Math.random() * width; }
-            if (this.x > width) this.x = 0;
-            if (this.x < 0) this.x = width;
+            this.y += this.speed*(1+(stormLevel*0.8));
+            this.x += ((windTurb-64)/8)*(this.z+0.2);
+            if (this.y > height) { this.y = -20; this.x = Math.random()*width; }
+            if (this.x > width) this.x = 0; if (this.x < 0) this.x = width;
         }
         draw() {
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 + (this.z * 0.4)})`;
-            ctx.lineWidth = 0.5; 
-            const drift = (windTurb - 64) / 8;
-            ctx.moveTo(this.x, this.y);
-            ctx.lineTo(this.x + drift, this.y + this.len);
-            ctx.stroke();
+            ctx.beginPath(); ctx.strokeStyle = `rgba(255,255,255,${0.1+(this.z*0.4)})`; ctx.lineWidth = 0.5;
+            ctx.moveTo(this.x, this.y); ctx.lineTo(this.x+((windTurb-64)/8), this.y+this.len); ctx.stroke();
         }
     }
 
-    function init() {
-        resize();
-        streaks = Array.from({length: 800}, () => new RainStreak());
-    }
-
+    function init() { resize(); streaks = Array.from({length: 800}, () => new RainStreak()); }
     function animate() {
-        ctx.fillStyle = '#3a3e47'; 
-        ctx.fillRect(0, 0, width, height);
-        const count = Math.floor((rainDensity / 127) * 700) + 100;
-        for (let i = 0; i < count; i++) {
-            streaks[i].update();
-            streaks[i].draw();
+        ctx.fillStyle = '#3a3e47'; ctx.fillRect(0,0,width,height);
+        if (stormLevel > 0) {
+            for (let i = 0; i < (Math.floor((rainDensity/127)*700)+100); i++) { streaks[i].update(); streaks[i].draw(); }
         }
         requestAnimationFrame(animate);
     }
 
     const rack = document.getElementById('rack');
-    controls.forEach(ctrl => {
-        const isStorm = ctrl.cc === 13;
-        const chan = document.createElement('div');
-        chan.className = 'channel';
-        chan.innerHTML = `
-            <label>${ctrl.name}</label>
-            <div class="slider-wrapper">
-                <input type="range" min="0" max="${isStorm ? 2 : 127}" step="1" 
-                       value="${ctrl.val}" data-cc="${ctrl.cc}">
-            </div>
-            <div class="val-display" id="val-${ctrl.cc}">${ctrl.val}</div>
-        `;
-        const slider = chan.querySelector('input');
-        slider.oninput = (e) => updateParam(ctrl.cc, parseInt(e.target.value));
-        rack.appendChild(chan);
-        updateParam(ctrl.cc, ctrl.val);
+    controls.forEach(c => {
+        const div = document.createElement('div'); div.className = 'channel';
+        div.innerHTML = `<label>${c.name}</label><div class="slider-wrapper"><input type="range" min="0" max="${c.isSwitch?2:127}" value="${c.val}" data-cc="${c.cc}"></div><div class="val-display" id="val-${c.cc}">${c.val}</div>`;
+        div.querySelector('input').oninput = (e) => updateParam(c.cc, parseInt(e.target.value));
+        rack.appendChild(div);
     });
 
     window.addEventListener('resize', init);
