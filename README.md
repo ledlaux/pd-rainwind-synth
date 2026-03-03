@@ -1,4 +1,4 @@
-## PD + webasembly + javascript ui
+## PD + webasembly + web ui
 
 Athmosferic rain and wind sound generator
 
