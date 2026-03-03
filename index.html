@@ -64,7 +64,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             width: 100%;
             margin-bottom: 30px;
         }
@@ -77,29 +76,46 @@
             margin: 0 -20px 20px 0; 
             opacity: 0.6;
             text-align: center;
-            width: 100%;
         }
 
         .controls-row {
             display: flex;
             gap: 10px;
+            align-items: center;
         }
 
-        .btn {
+        .btn, .preset-select {
             background: transparent;
             color: white;
             border: 1px solid var(--line);
-            padding: 8px 24px;
+            padding: 0 15px;
             font-size: 9px;
             text-transform: uppercase;
             letter-spacing: 2px;
             cursor: pointer;
-            transition: all 0.3s;
-            min-width: 110px;
+            height: 38px;
+            box-sizing: border-box;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            outline: none !important;
         }
 
+        #transportButton, #randomButton { 
+            width: 100px; 
+        }
+
+        .preset-select {
+            outline: none;
+            min-width: 180px;
+            text-align-last: center;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .preset-select option { background: #3a3e47; color: white; }
+
         .btn:disabled { opacity: 0.3; cursor: wait; }
-        .btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); }
         .btn.active { background: #fff; color: #000; }
 
         .rack { 
@@ -138,7 +154,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
         }
 
         input[type=range] { 
@@ -147,20 +162,43 @@
             width: 220px;
             height: 40px;
             background: transparent;
-            outline: none;
+            outline: none !important;
+            box-shadow: none !important;
             cursor: ns-resize;
             transform: rotate(-90deg);
             margin: 0;
             border-top: 1px solid var(--line);
             border-bottom: 1px solid var(--line);
+            -webkit-tap-highlight-color: transparent;
+            will-change: transform;
         }
 
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 1px;
+            appearance: none;
+            width: 2px;
             height: 38px;
-            background: #ffffff;
-            box-shadow: 0 0 10px rgba(255,255,255,0.8);
+            background: rgba(255, 255, 255, 0.8);
+            border: none;
+            box-shadow: none !important;
+            border-radius: 0;
+            transition: none;
+            image-rendering: crisp-edges;
+        }
+
+        input[type=range]::-moz-range-thumb {
+            width: 2px;
+            height: 38px;
+            background: rgba(255, 255, 255, 0.8);
+            border: none;
+            box-shadow: none !important;
+            border-radius: 0;
+            transition: none;
+            image-rendering: crisp-edges;
+        }
+
+        input[type=range]:focus {
+            outline: none;
         }
 
         .val-display { font-family: monospace; font-size: 10px; color: #fff; margin-top: 15px; }
@@ -175,6 +213,10 @@
             <h2>Rain & Wind</h2>
             <div class="controls-row">
                 <button id="transportButton" class="btn" onclick="toggleTransport()" disabled>Loading...</button>
+                <select id="presetSelect" class="preset-select" onchange="loadPreset(this.value)">
+                    <option value="light">Light Rain</option>
+                    <option value="intensive">Intensive Rain</option>
+                </select>
                 <button id="randomButton" class="btn" onclick="randomiseParameters()">Random</button>
             </div>
         </div>
@@ -186,7 +228,7 @@
     var loader = null;
 
     const controls = [
-        { cc: 7,  name: "Volume", val: 102 }, 
+        { cc: 7,  name: "Volume", val: 71 }, 
         { cc: 13, name: "Rain", val: 1, isSwitch: true }, 
         { cc: 14, name: "Wind", val: 33 },
         { cc: 17, name: "Density", val: 38 }, 
@@ -196,6 +238,11 @@
         { cc: 11, name: "Space", val: 60 },
         { cc: 10, name: "Surface", val: 41 }
     ];
+
+    const presets = {
+        light: [71, 1, 33, 38, 120, 23, 127, 60, 41],
+        intensive: [71, 1, 33, 66, 21, 87, 127, 60, 41]
+    };
 
     let rainDensity, stormLevel, windTurb;
 
@@ -221,6 +268,14 @@
         }
     }
 
+    function loadPreset(presetKey) {
+        const values = presets[presetKey];
+        if (!values) return;
+        controls.forEach((ctrl, index) => {
+            updateParam(ctrl.cc, values[index]);
+        });
+    }
+
     function toggleTransport() {
         if (!loader) return;
         const btn = document.getElementById("transportButton");
@@ -235,11 +290,8 @@
         loader.start();
         btn.innerText = "Stop";
         btn.classList.add("active");
-        
         setTimeout(() => {
-            controls.forEach(c => {
-                sendToSynth(c.cc, c.val);
-            });
+            controls.forEach(c => sendToSynth(c.cc, c.val));
         }, 150);
     }
 
@@ -262,8 +314,15 @@
 
     function updateParam(cc, v) {
         const ctrl = controls.find(c => c.cc === cc);
-        if (ctrl) ctrl.val = v;
+        if (!ctrl) return;
         
+        ctrl.val = v;
+        const slider = document.querySelector(`input[data-cc="${cc}"]`);
+        
+        if (slider && slider.value != v) {
+            slider.value = v;
+        }
+
         const display = document.getElementById(`val-${cc}`);
         if (display) display.innerText = v;
         
@@ -279,11 +338,7 @@
             if (ctrl.cc === 7) return; 
             const maxVal = ctrl.isSwitch ? 2 : 127;
             const randVal = Math.floor(Math.random() * (maxVal + 1));
-            const slider = document.querySelector(`input[data-cc="${ctrl.cc}"]`);
-            if (slider) {
-                slider.value = randVal;
-                updateParam(ctrl.cc, randVal);
-            }
+            updateParam(ctrl.cc, randVal);
         });
     }
 
@@ -308,14 +363,9 @@
         update() {
             const v = this.speed * (1 + (stormLevel * 0.8)); 
             const drift = (windTurb - 64) / 8; 
-            
             this.y += v;
             this.x += drift * (this.z + 0.2); 
-            
-            if (this.y > height) { 
-                this.y = -20; 
-                this.x = Math.random() * width; 
-            }
+            if (this.y > height) { this.y = -20; this.x = Math.random() * width; }
             if (this.x > width) this.x = 0;
             if (this.x < 0) this.x = width;
         }
@@ -338,9 +388,7 @@
     function animate() {
         ctx.fillStyle = '#3a3e47'; 
         ctx.fillRect(0, 0, width, height);
-        
         const count = Math.floor((rainDensity / 127) * 700) + 100;
-        
         for (let i = 0; i < count; i++) {
             streaks[i].update();
             streaks[i].draw();
@@ -356,23 +404,19 @@
         chan.innerHTML = `
             <label>${ctrl.name}</label>
             <div class="slider-wrapper">
-                <input type="range" 
-                       min="0" 
-                       max="${isStorm ? 2 : 127}" 
-                       step="1" 
-                       value="${ctrl.val}" 
-                       data-cc="${ctrl.cc}">
+                <input type="range" min="0" max="${isStorm ? 2 : 127}" step="1" 
+                       value="${ctrl.val}" data-cc="${ctrl.cc}">
             </div>
             <div class="val-display" id="val-${ctrl.cc}">${ctrl.val}</div>
         `;
         const slider = chan.querySelector('input');
         slider.oninput = (e) => updateParam(ctrl.cc, parseInt(e.target.value));
         rack.appendChild(chan);
+        updateParam(ctrl.cc, ctrl.val);
     });
 
     window.addEventListener('resize', init);
-    init(); 
-    animate();
+    init(); animate();
 </script>
 </body>
 </html>
