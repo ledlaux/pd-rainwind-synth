@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!--
+  Rain & Wind Synthesizer
+  -----------------------
+
+  Original patch:
+  Simple Trax & Taavi Viikman
+  https://youtu.be/ZXwk8sDts0Y
+
+  Adapted for Heavy compiler by
+  Ledlaux
+
+  MIT License
+-->
+
+<head>
+    <meta charset="UTF-8">
+    <title>Rain & Wind</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400&display=swap" rel="stylesheet">
+    <script type="application/javascript" src="./rain.js"></script>
+    <style>
+        :root {
+            --bg: #3a3e47; 
+            --line: rgba(255, 255, 255, 0.15); 
+            --accent: #ffffff;
+            --text-dim: #b0b5be; 
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg);
+            color: #fff; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden; 
+            position: relative;
+        }
+
+        #canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+        }
+
+        .ui-layer {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 35px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        h2 { 
+            font-weight: 100; 
+            letter-spacing: 20px; 
+            text-transform: uppercase; 
+            font-size: 0.7rem;
+            margin: 0 -20px 20px 0; 
+            opacity: 0.6;
+            text-align: center;
+            width: 100%;
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            background: transparent;
+            color: white;
+            border: 1px solid var(--line);
+            padding: 8px 24px;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 110px;
+        }
+
+        .btn:disabled { opacity: 0.3; cursor: wait; }
+        .btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); }
+        .btn.active { background: #fff; color: #000; }
+
+        .rack { 
+            display: flex; 
+            background: rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--line);
+            padding: 20px 0;
+        }
+
+        .channel { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            width: 85px;
+            height: 350px;
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .channel:last-child { border-right: none; }
+
+        label { 
+            font-size: 8px; 
+            height: 40px;
+            text-align: center; 
+            color: var(--text-dim); 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .slider-wrapper {
+            height: 220px;
+            width: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        input[type=range] { 
+            -webkit-appearance: none;
+            appearance: none;
+            width: 220px;
+            height: 40px;
+            background: transparent;
+            outline: none;
+            cursor: ns-resize;
+            transform: rotate(-90deg);
+            margin: 0;
+            border-top: 1px solid var(--line);
+            border-bottom: 1px solid var(--line);
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 1px;
+            height: 38px;
+            background: #ffffff;
+            box-shadow: 0 0 10px rgba(255,255,255,0.8);
+        }
+
+        .val-display { font-family: monospace; font-size: 10px; color: #fff; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas"></canvas>
+
+    <div class="ui-layer">
+        <div class="header-section">
+            <h2>Rain & Wind</h2>
+            <div class="controls-row">
+                <button id="transportButton" class="btn" onclick="toggleTransport()" disabled>Loading...</button>
+                <button id="randomButton" class="btn" onclick="randomiseParameters()">Random</button>
+            </div>
+        </div>
+        <div class="rack" id="rack"></div>
+    </div>
+
+<script>
+    var heavyModule = null;
+    var loader = null;
+
+    const controls = [
+        { cc: 7,  name: "Master<br>Gain", val: 50 }, 
+        { cc: 11, name: "Rain<br>Density", val: 81 }, 
+        { cc: 12, name: "HF<br>Damp", val: 81 },
+        { cc: 13, name: "Storm<br>Level", val: 2, isSwitch: true }, 
+        { cc: 14, name: "Wind<br>Turb", val: 33 },
+        { cc: 15, name: "Impact<br>Vel", val: 81 }, 
+        { cc: 16, name: "Droplet<br>Mass", val: 91 },
+        { cc: 17, name: "Space<br>Size", val: 43 },
+         { cc: 10, name: "Surface<br>Grain", val: 77 }
+    ];
+
+    let rainDensity, stormLevel, windTurb;
+
+    function syncVisualState() {
+        rainDensity = controls.find(c => c.cc === 11).val;
+        stormLevel = controls.find(c => c.cc === 13).val;
+        windTurb = controls.find(c => c.cc === 14).val;
+    }
+
+    window.onload = function() {
+        syncVisualState();
+        if (typeof rain_Module === 'function') {
+            rain_Module().then(loadedModule => {
+                heavyModule = loadedModule;
+                loader = new heavyModule.AudioLibLoader();
+                const btn = document.getElementById("transportButton");
+                btn.disabled = false;
+                btn.innerText = "Start";
+            });
+        }
+    }
+
+    function toggleTransport() {
+        if (!loader) return;
+        const btn = document.getElementById("transportButton");
+        if(!loader.webAudioContext) {
+            loader.init({ blockSize: 2048 }).then(() => startAudio(btn));
+        } else {
+            (loader.isPlaying) ? stopAudio(btn) : startAudio(btn);
+        }
+    }
+
+    function startAudio(btn) {
+        loader.start();
+        btn.innerText = "Stop";
+        btn.classList.add("active");
+        
+        setTimeout(() => {
+            controls.forEach(c => sendToSynth(c.cc, c.val));
+        }, 150);
+    }
+
+    function stopAudio(btn) {
+        loader.stop();
+        btn.innerText = "Start";
+        btn.classList.remove("active");
+    }
+
+    function sendToSynth(cc, value) {
+        if (loader && loader.isPlaying) {
+            const midiMsg = [0xB0, cc, value];
+            if(loader.webAudioWorklet) {
+                loader.sendMidi(midiMsg);
+            } else if (loader.audiolib) {
+                loader.audiolib.sendMidi(midiMsg);
+            }
+        }
+    }
+
+    function randomiseParameters() {
+        controls.forEach(ctrl => {
+            if (ctrl.cc === 7) return; 
+            const maxVal = ctrl.isSwitch ? 2 : 127;
+            const randVal = Math.floor(Math.random() * (maxVal + 1));
+            const slider = document.querySelector(`input[data-cc="${ctrl.cc}"]`);
+            if (slider) {
+                slider.value = randVal;
+                updateParam(ctrl.cc, randVal);
+            }
+        });
+    }
+
+    function updateParam(cc, v) {
+        const ctrl = controls.find(c => c.cc === cc);
+        if (ctrl) ctrl.val = v;
+        
+        document.getElementById(`val-${cc}`).innerText = v;
+        
+        if (cc === 11) rainDensity = v;
+        if (cc === 13) stormLevel = v;
+        if (cc === 14) windTurb = v;
+        
+        sendToSynth(cc, v);
+    }
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height, streaks = [];
+
+    function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    }
+
+    class RainStreak {
+        constructor() { this.init(); }
+        init() {
+            this.x = Math.random() * width;
+            this.y = Math.random() * height;
+            this.z = Math.random(); 
+            this.len = 5 + (this.z * 10); 
+            this.speed = 10 + (this.z * 12);
+        }
+        update() {
+            const v = this.speed * (1 + (stormLevel * 0.8)); 
+            const drift = (windTurb - 64) / 8; 
+            
+            this.y += v;
+            this.x += drift * (this.z + 0.2); 
+            
+            if (this.y > height) { 
+                this.y = -20; 
+                this.x = Math.random() * width; 
+            }
+            if (this.x > width) this.x = 0;
+            if (this.x < 0) this.x = width;
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 + (this.z * 0.4)})`;
+            ctx.lineWidth = 0.5; 
+            const drift = (windTurb - 64) / 8;
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(this.x + drift, this.y + this.len);
+            ctx.stroke();
+        }
+    }
+
+    function init() {
+        resize();
+        streaks = Array.from({length: 800}, () => new RainStreak());
+    }
+
+    function animate() {
+        ctx.fillStyle = '#3a3e47'; 
+        ctx.fillRect(0, 0, width, height);
+        
+        const count = Math.floor((rainDensity / 127) * 700) + 100;
+        
+        for (let i = 0; i < count; i++) {
+            streaks[i].update();
+            streaks[i].draw();
+        }
+        requestAnimationFrame(animate);
+    }
+
+    const rack = document.getElementById('rack');
+    controls.forEach(ctrl => {
+        const isStorm = ctrl.cc === 13;
+        const chan = document.createElement('div');
+        chan.className = 'channel';
+        chan.innerHTML = `
+            <label>${ctrl.name}</label>
+            <div class="slider-wrapper">
+                <input type="range" 
+                       min="0" 
+                       max="${isStorm ? 2 : 127}" 
+                       step="1" 
+                       value="${ctrl.val}" 
+                       data-cc="${ctrl.cc}">
+            </div>
+            <div class="val-display" id="val-${ctrl.cc}">${ctrl.val}</div>
+        `;
+        const slider = chan.querySelector('input');
+        slider.oninput = (e) => updateParam(ctrl.cc, parseInt(e.target.value));
+        rack.appendChild(chan);
+    });
+
+    window.addEventListener('resize', init);
+    init(); 
+    animate();
+</script>
+</body>
+</html>
