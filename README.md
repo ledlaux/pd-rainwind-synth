@@ -10,7 +10,7 @@ https://ledlaux.github.io/pd-rainwind-synth/
 
 This project explores the integration of **Pure Data (PD)**, **WebAssembly (Wasm)**, and **Web UI technologies** to create an interactive rain and wind sound generator.
 
-The synthesizer runs entirely in the browser using a high-performance DSP engine compiled from a PD patch into WebAssembly via Heavy (hvcc). The result is a responsive, low-latency soundscape generator with reactive visuals.
+It runs entirely in the browser using a high-performance DSP engine compiled from a PD patch into WebAssembly via Heavy (hvcc). The result is a responsive, low-latency soundscape generator with reactive visuals.
 
 
 
