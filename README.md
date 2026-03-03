@@ -8,15 +8,16 @@ Athmosferic rain and wind sound generator
 
 ## Technical Overview ##
 
-This project bridges the gap between high-performance audio DSP (Digital Signal Processing) and modern web technologies. By using Heavy (hvcc)—the compiler behind PlugData's web export—the original Pure Data patch is converted into highly optimized C++ and then compiled into WebAssembly.
+This project is a result of my exploration of Plugdata compile mode. It connects high-performance audio DSP and web technologies. By using Heavy (hvcc) - the PD patch is converted into highly optimized C++ and then compiled into WebAssembly.
+
 
 ## Key Features ##
 
 Low-Latency Audio: Running the synth engine in a WebAudio Worklet ensures the audio remains glitch-free even when the UI is performing complex animations.
 
-Procedural Visuals: The background animation is a custom HTML5 Canvas engine that is "hard-wired" to the synth parameters. When you change the rain density or storm level, the visuals react in perfect sync with the sound.
+Visuals: The background animation is a custom HTML5 Canvas engine that is wired to the synth parameters. When you change the rain density or storm level, the visuals react.
 
-Modern Glassmorphism UI: A clean, minimalist interface using CSS backdrop-filters and vertical faders to mimic high-end studio rack gear.
+UI: A clean, minimalist interface using CSS designed by Gemini AI.
 
 ## The Workflow ##
 
@@ -24,4 +25,4 @@ Sound Design:  Rain and wind synthesizer is an original [patch](https://youtu.be
 
 Compilation: Exported from Plugdata via the Heavy compiler to generate the .js and .wasm binaries required for browser execution.  
 
-UI Integration: As I am not good at ui desing I asked a help from Gemini AI to make me a javascript web ui. GUI sliders where mapped to specific MIDI (CC) defined in the PD patch, creating a seamless bridge between the HTML front-end and the Wasm back-end.  
+UI Integration: GUI sliders where mapped to specific MIDI (CC) defined in the PD patch, creating a seamless bridge between the HTML front-end and the Wasm back-end.  
