@@ -98,7 +98,6 @@
         }
 
         .coffee-wrapper { margin: 15px 0; text-align: center; }
-
         .close-btn { margin-top: 10px; width: 100%; }
 
         .ui-layer {
@@ -117,8 +116,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center; /* Center-focused */
             width: 100%;
-            margin-bottom: 30px;
+            gap: 15px; /* Equal spacing between name and buttons */
+            margin-bottom: 15px; /* Equal spacing between buttons and container */
             position: relative;
         }
 
@@ -139,12 +140,16 @@
             letter-spacing: 20px; 
             text-transform: uppercase; 
             font-size: 0.7rem;
-            margin: 0 -20px 20px 0; 
+            margin: 0 -20px 0 0; 
             opacity: 0.6;
             text-align: center;
         }
 
-        .controls-row { display: flex; gap: 10px; align-items: center; }
+        .controls-row { 
+            display: flex; 
+            gap: 10px; 
+            align-items: center;
+        }
 
         .btn, .preset-select {
             background: transparent;
@@ -174,7 +179,6 @@
         }
 
         .preset-select option { background: #3a3e47; color: white; }
-
         .btn:disabled { opacity: 0.3; cursor: wait; }
         .btn.active { background: #fff; color: #000; }
 
@@ -240,19 +244,15 @@
     <div id="infoModal" onclick="toggleAbout(false)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <h3>About</h3>
-            <p>Interactive rain & wind generator using <strong>Pure Data</strong> and <strong>WebAssembly</strong> via Heavy (hvcc)</p>
-            <p>• Low-latency DSP engine<br>• Reactive Canvas visuals<br>• Slider mapping to patch parameters</p>
+            <p>Interactive rain & wind generator using <strong>Pure Data</strong> and <strong>WebAssembly</strong> via Heavy (hvcc).</p>
+            <p>• Low-latency DSP engine.<br>• Reactive Canvas visuals.<br>• MIDI CC mapping.</p>
             <p>Source: <a href="https://github.com/ledlaux/pd-rainwind-synth" target="_blank">GitHub</a></p>
             <div class="coffee-wrapper">
                 <a href="https://www.buymeacoffee.com/ledlaux" target="_blank">
                     <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Coffee">
                 </a>
             </div>
-
-            <div class="copyright">
-                © 2026 Vadims Maksimovs | MIT License
-            </div>
-
+            <div class="copyright">© 2026 Vadims Maksimovs | MIT License</div>
             <button class="btn close-btn" onclick="toggleAbout(false)">Close</button>
         </div>
     </div>
@@ -282,7 +282,7 @@
     var heavyModule = null, loader = null;
     const controls = [
         { cc: 7,  name: "Volume", val: 71 }, 
-        { cc: 13, name: "Rain", val: 1, isSwitch: true }, 
+        { cc: 13, name: "Rain", val: 1, range: 3 }, 
         { cc: 14, name: "Wind", val: 33 },
         { cc: 17, name: "Density", val: 38 }, 
         { cc: 12, name: "HF", val: 120 },
@@ -291,7 +291,7 @@
         { cc: 11, name: "Space", val: 60 },
         { cc: 10, name: "Surface", val: 41 }
     ];
-    const presets = { light: [71, 1, 33, 38, 120, 23, 127, 60, 41], intensive: [71, 1, 33, 66, 21, 87, 127, 60, 41] };
+    const presets = { light: [71, 1, 33, 38, 120, 23, 127, 60, 41], intensive: [71, 3, 33, 66, 21, 87, 127, 60, 41] };
     let rainDensity, stormLevel, windTurb;
 
     function toggleAbout(show) { document.getElementById('infoModal').style.display = show ? 'flex' : 'none'; }
@@ -347,7 +347,7 @@
     }
 
     function loadPreset(k) { presets[k].forEach((v, i) => updateParam(controls[i].cc, v)); }
-    function randomiseParameters() { controls.forEach(c => { if(c.cc!=7) updateParam(c.cc, Math.floor(Math.random()*(c.isSwitch?3:128))); }); }
+    function randomiseParameters() { controls.forEach(c => { if(c.cc!=7) updateParam(c.cc, Math.floor(Math.random()*((c.range||127)+1))); }); }
 
     const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
     let width, height, streaks = [];
@@ -357,7 +357,7 @@
         constructor() { this.init(); }
         init() { this.x = Math.random()*width; this.y = Math.random()*height; this.z = Math.random(); this.len = 5+(this.z*10); this.speed = 10+(this.z*12); }
         update() {
-            this.y += this.speed*(1+(stormLevel*0.8));
+            this.y += this.speed*(1+(stormLevel*0.5));
             this.x += ((windTurb-64)/8)*(this.z+0.2);
             if (this.y > height) { this.y = -20; this.x = Math.random()*width; }
             if (this.x > width) this.x = 0; if (this.x < 0) this.x = width;
@@ -372,7 +372,8 @@
     function animate() {
         ctx.fillStyle = '#3a3e47'; ctx.fillRect(0,0,width,height);
         if (stormLevel > 0) {
-            for (let i = 0; i < (Math.floor((rainDensity/127)*700)+100); i++) { streaks[i].update(); streaks[i].draw(); }
+            const count = Math.floor((rainDensity/127)*700 * (stormLevel/3)) + 100;
+            for (let i = 0; i < count; i++) { streaks[i].update(); streaks[i].draw(); }
         }
         requestAnimationFrame(animate);
     }
@@ -380,7 +381,7 @@
     const rack = document.getElementById('rack');
     controls.forEach(c => {
         const div = document.createElement('div'); div.className = 'channel';
-        div.innerHTML = `<label>${c.name}</label><div class="slider-wrapper"><input type="range" min="0" max="${c.isSwitch?2:127}" value="${c.val}" data-cc="${c.cc}"></div><div class="val-display" id="val-${c.cc}">${c.val}</div>`;
+        div.innerHTML = `<label>${c.name}</label><div class="slider-wrapper"><input type="range" min="0" max="${c.range||127}" value="${c.val}" data-cc="${c.cc}"></div><div class="val-display" id="val-${c.cc}">${c.val}</div>`;
         div.querySelector('input').oninput = (e) => updateParam(c.cc, parseInt(e.target.value));
         rack.appendChild(div);
     });
