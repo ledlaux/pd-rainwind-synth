@@ -1,28 +1,57 @@
-## PD + webasembly + web ui
+# 🌧️ PD + WebAssembly + Web UI  
+## Atmospheric Rain & Wind Sound Generator  
 
-Athmosferic rain and wind sound generator
+🔊 **Live Demo:**  
+https://ledlaux.github.io/pd-rainwind-synth/
 
+---
 
-[Live Demo](https://ledlaux.github.io/pd-rainwind-synth/)
+## Overview
 
+This project explores the integration of **Pure Data (PD)**, **WebAssembly (Wasm)**, and modern **Web UI technologies** to create an interactive atmospheric rain and wind sound generator.
 
-## Technical Overview ##
+The synthesizer runs entirely in the browser using a high-performance DSP engine compiled from a PD patch into WebAssembly via Heavy (hvcc). The result is a responsive, low-latency procedural soundscape generator with reactive visuals.
 
-This project is a result of my exploration of Plugdata compile mode. It connects high-performance audio DSP with web technologies. By using Heavy (hvcc) - the PD patch is converted into highly optimized C++ and then compiled into WebAssembly.
+---
 
+## Technical Architecture
 
-## Key Features ##
+### 🎛 Sound Engine
 
-Low-Latency Audio: Running the synth engine in a WebAudio Worklet ensures the audio remains glitch-free even when the UI is performing complex animations.
+The core synthesizer is based on an original [patch](https://youtu.be/ZXwk8sDts0Y) by Simple Trax and Taavi Viikman, adapted for WebAssembly compilation.
 
-Visuals: The background animation is a custom HTML5 Canvas engine that is wired to the synth parameters. When you change the rain density or storm level, the visuals react.
+- Built in **Pure Data**
+- Compiled using **Plugdata Compile Mode**
+- Exported via **Heavy (hvcc)** to optimized C++
+- Compiled into `.wasm` and `.js` binaries
+- Executed inside a **WebAudio Worklet** for real-time performance
 
-UI: A clean, minimalist interface using CSS designed by Gemini AI.
+This ensures:
 
-## The Workflow ##
+- Low-latency audio processing  
+- Glitch-free playback  
+- Stable performance even during UI animation updates  
 
-Sound Design:  Rain and wind synthesizer is an original [patch](https://youtu.be/ZXwk8sDts0Y) by Simple Trax and Taavi Viikman adapted by me for the hvcc compilation.  
+---
 
-Compilation: Exported from Plugdata via the Heavy compiler to generate the .js and .wasm binaries required for browser execution.  
+### 🌩 Visual Engine
 
-UI Integration: GUI sliders where mapped to specific MIDI (CC) defined in the PD patch, creating a seamless bridge between the HTML front-end and the Wasm back-end.  
+The background animation is a custom **HTML5 Canvas** rendering engine directly mapped to synthesizer parameters.
+
+- Rain density affects particle intensity  
+- Storm level influences animation dynamics  
+- Visuals react in real-time to sound changes  
+
+This creates a tightly coupled audio-visual experience.
+
+---
+
+### 🎚 User Interface (Gemini AI)
+
+The UI follows a clean, minimalist approach:
+
+- Custom CSS styling 
+- Responsive layout  
+- Intuitive parameter controls  
+
+Sliders in the HTML interface are mapped to specific **MIDI CC values** defined in the PD patch.
