@@ -1,20 +1,20 @@
-## 🌧️  Atmospheric Rain & Wind Sound Generator  
+# Atmospheric Rain & Wind Sound Generator  
 
   
-🔊 **Live Demo:**  
+ **Live Demo:**  
 https://ledlaux.github.io/pd-rainwind-synth/
   
----
 
-### Overview
+
+##  Overview
 
 This project explores the integration of **Pure Data (PD)**, **WebAssembly (Wasm)**, and **Web UI technologies** to create an interactive rain and wind sound generator.
 
 The synthesizer runs entirely in the browser using a high-performance DSP engine compiled from a PD patch into WebAssembly via Heavy (hvcc). The result is a responsive, low-latency soundscape generator with reactive visuals.
 
----
 
-### 🎛 Sound Engine
+
+##  Sound Engine
 
 The core synthesizer is based on an original [patch](https://youtu.be/ZXwk8sDts0Y) by Simple Trax and Taavi Viikman, adapted for WebAssembly compilation.
 
@@ -24,31 +24,11 @@ The core synthesizer is based on an original [patch](https://youtu.be/ZXwk8sDts0
 - Compiled into `.wasm` and `.js` binaries
 - Executed inside a **WebAudio Worklet** for real-time performance
 
----
-
-### 🌩 Visual Engine
-
-The background animation is a custom **HTML5 Canvas** rendering engine directly mapped to synthesizer parameters.
-
-- Rain density affects particle intensity  
-- Storm level influences animation dynamics  
-- Visuals react in real-time to sound changes  
-
-This creates a tightly coupled audio-visual experience.
-
---
-
-### 🎚 User Interface (Gemini AI)
-
-The UI follows a clean, minimalist approach:
-
-- Custom CSS styling 
-- Responsive layout  
-- Intuitive parameter controls  
-
-Sliders in the HTML interface are mapped to specific **MIDI CC values** defined in the PD patch.
 
 
+##  User Interface (Gemini AI)
+
+The UI follows a clean, minimalist approach. The background animation of rain is a custom **HTML5 Canvas**. Visuals react in real-time to some parameters. Sliders in the HTML interface are mapped to specific **MIDI CC values** defined in the PD patch. 
 
 
 
