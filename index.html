@@ -12,7 +12,7 @@
   Ledlaux
 
   MIT License
---> 
+-->
 <head>
     <meta charset="UTF-8">
     <title>Rain & Wind Synthesizer</title>
@@ -110,6 +110,8 @@
             padding: 35px;
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: scale(1.2); 
+            transform-origin: center;
         }
 
         .header-section {
@@ -186,7 +188,7 @@
             display: flex; 
             background: rgba(0, 0, 0, 0.1);
             border: 1px solid var(--line);
-            padding: 20px 10px; /* Added slight horizontal padding */
+            padding: 20px 10px; 
         }
 
         .channel { 
@@ -309,7 +311,7 @@
         windTurb = controls.find(c => c.cc === 14).val;
     }
 
-window.onload = function() {
+    window.onload = function() {
     const select = document.getElementById('presetSelect');
     if (select) {
         select.innerHTML = '';
@@ -330,7 +332,7 @@ window.onload = function() {
             b.innerText = "Start";
         });
     }
-}
+    }
 
     function toggleTransport() {
         const b = document.getElementById("transportButton");
@@ -372,11 +374,16 @@ window.onload = function() {
     } else {
         sendToSynth(cc, v);
     }
-}
+    }
 
     function loadPreset(k) { presets[k].forEach((v, i) => updateParam(controls[i].cc, v)); }
-    function randomiseParameters() { controls.forEach(c => { if(c.cc!=7) updateParam(c.cc, Math.floor(Math.random()*((c.range||127)+1))); }); }
-
+    function randomiseParameters() { 
+        controls.forEach(c => { 
+            if (c.cc !== 7 && c.cc !== 13) { 
+                updateParam(c.cc, Math.floor(Math.random() * ((c.range || 127) + 1))); 
+            } 
+        }); 
+    }
     const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
     let width, height, streaks = [];
     function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
