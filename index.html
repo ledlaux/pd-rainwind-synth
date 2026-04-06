@@ -329,7 +329,7 @@
             loader = new m.AudioLibLoader();
             const b = document.getElementById("transportButton");
             b.disabled = false; 
-            b.innerText = "Start";
+            b.innerText = "Play";
         });
     }
     }
@@ -341,7 +341,7 @@
     }
 
     function startAudio(b) {
-        loader.start(); b.innerText = "Stop"; b.classList.add("active");
+        loader.start(); b.innerText = "Pause"; b.classList.add("active");
         setTimeout(() => controls.forEach(c => sendToSynth(c.cc, c.val)), 150);
     }
 
