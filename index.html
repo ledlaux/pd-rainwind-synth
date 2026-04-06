@@ -287,7 +287,7 @@
     var heavyModule = null, loader = null;
     const controls = [
         { cc: 7,  name: "Volume", val: 71 }, 
-        { cc: 13, name: "Rain", val: 47 }, 
+        { cc: 13, name: "Rain", val: 1, range: 1 }, 
         { cc: 14, name: "Wind", val: 33 },
         { cc: 17, name: "Density", val: 38 }, 
         { cc: 12, name: "HF", val: 120 },
@@ -298,9 +298,9 @@
     ];
 
     const presets = { 
-        light: [71, 5, 33, 38, 120, 23, 127, 60, 41], 
-        medium: [71, 13, 33, 66, 21, 87, 127, 80, 80], 
-        intensive: [50, 22, 54, 70, 16, 127, 127, 127, 127 ] };
+        light: [71, 1, 33, 38, 120, 23, 127, 60, 41], 
+        medium: [71, 1, 33, 66, 21, 87, 127, 80, 80], 
+        intensive: [50, 1, 54, 70, 16, 127, 127, 127, 127 ] };
 
     let rainDensity, stormLevel, windTurb;
 
