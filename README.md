@@ -16,7 +16,7 @@ It runs entirely in the browser using a high-performance DSP engine compiled fro
 
 ##  Sound Engine
 
-The core synthesis is based on an original [patch](https://youtu.be/ZXwk8sDts0Y) by Simple Trax and Taavi Viikman, adapted for hvcc.
+The core synthesis is based on an original [idea](https://youtu.be/ZXwk8sDts0Y) of Taavi Viikman and [patch](https://github.com/MikeMorenoDSP/pd-mkmr/blob/master/sound%20effects/rain~.pd) by Miquel Moreno, adapted for hvcc.
 
 - Built in **Pure Data**
 - Compiled using **Plugdata Compile Mode**
@@ -32,16 +32,6 @@ The UI follows a clean, minimalist approach. The background animation of rain is
 
 
 
-## License
 
-  Original idea by Taavi Viikman  
-  https://youtu.be/ZXwk8sDts0Y
-
-  PD patch by Miguel Moreno  
-  https://github.com/MikeMorenoDSP/pd-mkmr  
-  3-Clause BSD License
-
-  Adapted for hvcc compiler by Vadims Maksimovs  
-  MIT License
 
 
