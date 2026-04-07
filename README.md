@@ -32,6 +32,17 @@ The UI follows a clean, minimalist approach. The background animation of rain is
 
 
 
+## License
 
+  Original idea:
+  Simple Trax & Taavi Viikman
+  https://youtu.be/ZXwk8sDts0Y
+
+  PD patch by Miguel Moreno
+  https://github.com/MikeMorenoDSP/pd-mkmr
+  3-Clause BSD License
+
+  Adapted for hvcc compiler by Vadims Maksimovs
+  MIT License
 
 
